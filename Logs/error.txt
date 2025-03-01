@@ -1,0 +1,1 @@
+Ошибка: name 'QMessageBox' is not defined

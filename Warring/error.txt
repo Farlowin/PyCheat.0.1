@@ -1,0 +1,12 @@
+[ERROR] Ошибка в run_cs2_and_check: [WinError 2] Не удается найти указанный файл
+[ERROR] Ошибка в run_cs2_and_check: [WinError 2] Не удается найти указанный файл
+[ERROR] Ошибка в run_cs2_and_check: [WinError 2] Не удается найти указанный файл
+[ERROR] Ошибка в run_cs2_and_check: [WinError 2] Не удается найти указанный файл
+[ERROR] Ошибка в run_cs2_and_check: [WinError 2] Не удается найти указанный файл
+[ERROR] Ошибка в download_cheat: 'CheatInstaller' object has no attribute 'on_cheat_finished'
+[ERROR] Ошибка в download_cheat: 'CheatInstaller' object has no attribute 'on_cheat_finished'
+[ERROR] Ошибка в download_cheat: 'CheatInstaller' object has no attribute 'on_cheat_finished'
+[ERROR] Ошибка в download_cheat: 'CheatInstaller' object has no attribute 'on_cheat_finished'
+[ERROR] Ошибка в download_cheat: 'CheatInstaller' object has no attribute 'on_cheat_finished'
+[ERROR] Ошибка в download_cheat: 'CheatInstaller' object has no attribute 'on_cheat_finished'
+[ERROR] Ошибка в download_cheat: 'CheatInstaller' object has no attribute 'on_cheat_finished'
