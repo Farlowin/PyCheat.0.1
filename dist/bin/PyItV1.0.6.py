@@ -363,7 +363,7 @@ class ESPWindow(QtWidgets.QWidget):
                 self.fps = self.frame_count
                 self.frame_count = 0
                 self.last_time = current_time
-            fps_text = self.scene.addText(f"PyIt | FPS: {self.fps}", QtGui.QFont('DejaVu Sans', 12, QtGui.QFont.Bold))
+
             fps_text.setPos(5, 5)
             fps_text.setDefaultTextColor(QtGui.QColor(255, 255, 255))
         except Exception as e:

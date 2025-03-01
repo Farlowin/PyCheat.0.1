@@ -5,20 +5,28 @@ import subprocess
 import configparser
 import requests
 import psutil
+log_dir = "Logs"
+log_file = os.path.join(log_dir, "log.txt")
+os.makedirs(log_dir, exist_ok=True)
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget,
                                QPushButton, QLabel, QComboBox, QProgressBar, QCheckBox, QMenuBar, QMenu, QMessageBox)
 import qt_material
 import psutil  
-# Конфигурация
+
 CONFIG_URL = "https://raw.githubusercontent.com/Farlowin/PythoCheats/main/config.ini"
 UPDATE_URL = "https://raw.githubusercontent.com/Farlowin/PythoCheats/main/PYCHEAT.exe"
 LOCAL_CONFIG = "config.ini"
 LOCAL_EXECUTABLE = "PYCHEAT.exe"
 
-CHEAT_URL = "https://raw.githubusercontent.com/Read1dno/PyIt---external-cheat-cs2-in-python/main/PyItV1.0.6.py"
-CHEAT_PATH = "bin/PyItV1.0.6.py"
+CHEAT_URL_CS2ESP = "https://raw.githubusercontent.com/Read1dno/CS2ESP-external-cheat/main/CS2ESP.py"
+CHEAT_PATH_CS2ESP = "bin/CS2ESP.py"
+
+
+CHEAT_URL_06 = "https://raw.githubusercontent.com/Read1dno/PyIt---external-cheat-cs2-in-python/main/PyItV1.0.6.py"
+CHEAT_PATH_06 = "bin/PyItV1.0.6.py"
 REQUIRED_LIBRARIES = [
     "PySide6",
     "requests",
@@ -47,21 +55,28 @@ def install_libraries(libraries):
     subprocess.check_call([sys.executable, "-m", "pip", "install"] + libraries)
 
     
-# Создание папок
+
 os.makedirs("Logs", exist_ok=True)
 os.makedirs("bin", exist_ok=True)
 text = """
+Если чит  PyItV1.0.6 не запускается, выполните следующие шаги:
 
-Для начала запустите CS2.  
-После этого выберите чит.  
+ 
+1. Установите необходимые библиотеки, введя в терминале:  
+   pip install PySide6 requests pymem pywin32 pynput qt_material  
+2 если не помогло то обновите Pythjn
+3 Или свяжитесь с разрабочиком Discord jacklats TG jacklats
+После этого запустите CS2.  
+Выберите чит.  
 Нажмите "Запустить".  
 
 Важно:  
 - В CS2 должно быть включено разрешение "В окне".  
-- Разработчик: JackLat "".  
-- Помощник : Meetlat Show"".  
-"""
+- Чит запускать только во время катки, иначе WH не будет работать.  
 
+Разработчик: JackLat.  
+Помощник: Meetlat Show.  
+"""
 
 if not os.path.exists("info.txt"):
     with open("info.txt", "w", encoding="utf-8") as file:
@@ -82,13 +97,13 @@ config_path = "config.ini"
 config = configparser.ConfigParser()
 
 if not os.path.exists(config_path):
-    config["SETTINGS"] = {"auto_update": "False", "version": "1.1", "check_libraries": "True"}
+    config["SETTINGS"] = {"auto_update": "False", "version": "1.1", "check_libraries": "False"}
     with open(config_path, "w") as config_file:
         config.write(config_file)
 else:
     config.read(config_path)
 
-# Читаем параметр отключения проверки библиотек
+
 check_libraries = config.getboolean("SETTINGS", "check_libraries", fallback=True)
 
 
@@ -131,7 +146,7 @@ def update_files():
     if download_file(CONFIG_URL, LOCAL_CONFIG) and download_file(UPDATE_URL, LOCAL_EXECUTABLE):
         QMessageBox.information(None, "Обновление", "Обновление успешно установлено. Перезапуск...")
 
-        # Завершаем старый процесс
+
         kill_process("PYCHEAT.exe")
 
 
@@ -174,7 +189,8 @@ class CheatInstaller(QMainWindow):
         self.layout.addWidget(self.label)
 
         self.cheat_select = QComboBox(self)
-        self.cheat_select.addItem("PyItV1.0.6")
+        self.cheat_select.addItem("PyItV1.0.6")        
+        self.cheat_select.addItem("CS2ESP")
         self.layout.addWidget(self.cheat_select)
 
         self.start_button = QPushButton("Запустить")
@@ -263,34 +279,53 @@ class CheatInstaller(QMainWindow):
         dialog.exec()
 
 
+
     def start_cheat(self):
         """Запускает чит, если все условия соблюдены."""
         global cheat_process
-        missing_libraries = check_missing_libraries()
-        
-        if missing_libraries:
-            reply = QMessageBox.question(
-                None, "Отсутствуют библиотеки",
-                f"Не найдены библиотеки: {', '.join(missing_libraries)}\nУстановить их?",
-                QMessageBox.Yes | QMessageBox.No
-            )
-            if reply == QMessageBox.Yes:
-                install_libraries(missing_libraries)
-            else:
-                return
+
+        if not self.check_python_version():
+            return  
+
+        if check_libraries:  
+            missing_libraries = check_missing_libraries()
+            if missing_libraries:
+                reply = QMessageBox.question(
+                    self, "Отсутствуют библиотеки",
+                    f"Не найдены библиотеки: {', '.join(missing_libraries)}\nУстановить их?",
+                    QMessageBox.Yes | QMessageBox.No
+                )
+                if reply == QMessageBox.Yes:
+                    install_libraries(missing_libraries)
+                else:
+                    return
 
         if not is_cs2_running():
-            QMessageBox.warning(None, "Ошибка", "Запустите CS2 перед запуском чита.")
+            QMessageBox.warning(self, "Ошибка", "Запустите CS2 перед запуском чита.")
             return
 
-        cheat_path = CHEAT_PATH
+        cheat_name = self.cheat_select.currentText()
+        cheat_path = None
+
+        if cheat_name == "CS2ESP":
+            cheat_path = os.path.join("bin", "CS2ESP.py")
+            download_function = self.download_cheat_CS2ESP
+        elif cheat_name == "PyItV1.0.6":
+            cheat_path = os.path.join("bin", "PyItV1.0.6.py")
+            download_function = self.download_cheat_06
+        else:
+            QMessageBox.warning(self, "Ошибка", "Выбранный чит не поддерживается.")
+            return
 
         if not os.path.exists(cheat_path):
-            self.download_cheat()
-
-        cheat_process = subprocess.Popen([sys.executable, cheat_path])
-        QMessageBox.information(None, "Запуск", "Чит успешно запущен!")
-
+            download_function()
+        
+        self.active_cheat_file = cheat_path  
+        self.status_label.setText("Запуск чита...")
+        cheat_process = subprocess.Popen(["python", cheat_path], shell=True)
+        self.start_button.setText("Отключить")
+        self.status_label.setText(f"Чит {cheat_name} запущен.")
+        QMessageBox.information(self, "Запуск", f"Чит {cheat_name} успешно запущен!")
 
 
     def stop_cheat(self):
@@ -303,7 +338,7 @@ class CheatInstaller(QMainWindow):
     
             for process in psutil.process_iter(attrs=['pid', 'name']):
                 if "python" in process.info['name'].lower() or "python.exe" in process.info['name'].lower():
-                    process.terminate()  # Принудительно убиваем процесс
+                    process.terminate()  
 
             self.start_button.setText("Запустить")
             self.status_label.setText(f"Чит {self.active_cheat_file} отключен.")
@@ -312,13 +347,21 @@ class CheatInstaller(QMainWindow):
 
 
 
-    def download_cheat(self):
+    def download_cheat_CS2ESP(self):
         self.status_label.setText("Скачивание чита...")
-        response = requests.get(CHEAT_URL, stream=True)
-        with open(CHEAT_PATH, "wb") as f:
+        response = requests.get(CHEAT_URL_CS2ESP, stream=True)
+        with open(CHEAT_PATH_CS2ESP, "wb") as f:
             for chunk in response.iter_content(1024):
                 f.write(chunk)
         self.status_label.setText("Чит успешно скачан.")
+
+    def download_cheat_06(self):
+        self.status_label.setText("Скачивание чита...")
+        response = requests.get(CHEAT_URL_06, stream=True)
+        with open(CHEAT_PATH, "wb") as f:
+            for chunk in response.iter_content(1024):
+                f.write(chunk)
+        self.status_label.setText("Чит успешно скачан.")        
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = CheatInstaller()
